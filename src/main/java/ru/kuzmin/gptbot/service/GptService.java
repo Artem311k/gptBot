@@ -38,18 +38,11 @@ public class GptService {
                 newRequest(model, messages, temperature),
                 buildHeaders(apiToken));
 
-        ResponseEntity<ChatResponse> response = restTemplate.exchange(
-                completionsUri,
-                HttpMethod.POST,
-                requestHttpEntity,
-                ChatResponse.class
-        );
-        if (response.getBody() == null) {
-            throw new RuntimeException(String.format("Returned null from request to {%s}", completionsUri));
-        }
+        ResponseEntity<ChatResponse> response = restTemplate.exchange(completionsUri, HttpMethod.POST, requestHttpEntity, ChatResponse.class);
 
-        return response.getBody().getChoices().get(0).getMessage().getContent();
-
+        return Optional.ofNullable(response.getBody())
+                .map(r -> r.getChoices().get(0).getMessage().getContent())
+                .orElseThrow(() -> new RuntimeException(String.format("Returned null from request to {%s}", completionsUri)));
     }
 
 

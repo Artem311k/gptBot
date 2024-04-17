@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * @author Kuzmin Artem
  * @since 11 апр. 2024 г.
  */
-public enum Role {
+public enum ChatRole {
     SYSTEM("system"),
     USER("user"),
     ASSISTANT("assistant");
@@ -14,7 +14,7 @@ public enum Role {
     private final String role;
 
 
-    Role(String role) {
+    ChatRole(String role) {
         this.role = role;
     }
 

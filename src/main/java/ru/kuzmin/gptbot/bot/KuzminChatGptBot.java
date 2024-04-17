@@ -18,12 +18,13 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.kuzmin.gptbot.Enum.GPTModel;
-import ru.kuzmin.gptbot.Enum.Role;
+import ru.kuzmin.gptbot.Enum.ChatRole;
 import ru.kuzmin.gptbot.interaction.Message;
 import ru.kuzmin.gptbot.service.GptService;
 
 import static ru.kuzmin.gptbot.Enum.GPTModel.*;
-import static ru.kuzmin.gptbot.Enum.Role.*;
+import static ru.kuzmin.gptbot.Enum.ChatRole.*;
+import static ru.kuzmin.gptbot.utils.Command.*;
 
 /**
  * @author Kuzmin Artem
@@ -33,16 +34,12 @@ import static ru.kuzmin.gptbot.Enum.Role.*;
 @Component
 @Slf4j
 public class KuzminChatGptBot extends TelegramLongPollingBot {
-    private static final String START = "/start";
-    private static final String FLUSH = "/flush";
-    private static final String GPT_3_5_MSG = "/gpt3";
-    private static final String GPT_4_TURBO_MSG = "/gpt4";
-    private static final String HELP = "/help";
+
     public KuzminChatGptBot(GptService service) {
         super(System.getProperty("botToken"));
-        this.service = service;
+        this.gptService = service;
     }
-    private final GptService service;
+    private final GptService gptService;
 
     @Value("${app.default.prompt}")
     private String defaultPrompt;
@@ -59,7 +56,10 @@ public class KuzminChatGptBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        process(update);
+    }
 
+    private void process(Update update) {
         if (!update.hasMessage() || !update.getMessage().hasText()) {
             return;
         }
@@ -88,15 +88,19 @@ public class KuzminChatGptBot extends TelegramLongPollingBot {
 
         String response;
         try {
-            response = service.getResponse(getChatContext(chatId), model, TEMPERATURE);
-            sendMessage(chatId, response);
-            addMessageToContext(chatId, ASSISTANT, response);
+            response = gptService.getResponse(getChatContext(chatId), model, TEMPERATURE);
+            sendChatResponseToUser(chatId, response);
         } catch (Exception e) {
             sendMessage(chatId, "Exception while trying to get response : " + e.getMessage());
         } finally {
             typingFuture.cancel(true);
         }
         switchModelToDefault(chatId);
+    }
+
+    private void sendChatResponseToUser(String chatId, String response) {
+        sendMessage(chatId, response);
+        addMessageToContext(chatId, ASSISTANT, response);
     }
 
     private GPTModel switchModelToDefault(String chatId) {
@@ -116,12 +120,12 @@ public class KuzminChatGptBot extends TelegramLongPollingBot {
         return modelCash.computeIfAbsent(chatId, this::switchModelToDefault);
     }
 
-    private void addMessageToContext(String chatId, Role role, String text) {
+    private void addMessageToContext(String chatId, ChatRole chatRole, String text) {
         List<Message> chatContext = getChatContext(chatId);
         if (chatContext.size() >= MAX_CONTEXT_LENGTH) {
             chatContext.remove(1);
         }
-        chatContext.add(new Message(role, text));
+        chatContext.add(new Message(chatRole, text));
     }
 
     private List<Message> getChatContext(String chatId) {

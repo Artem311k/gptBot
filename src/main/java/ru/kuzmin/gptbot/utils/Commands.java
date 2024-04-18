@@ -4,7 +4,7 @@ package ru.kuzmin.gptbot.utils;
  * @author Kuzmin Artem
  * @since 17 апр. 2024 г.
  */
-public class Command {
+public class Commands {
 
     public static final String START = "/start";
     public static final String FLUSH = "/flush";

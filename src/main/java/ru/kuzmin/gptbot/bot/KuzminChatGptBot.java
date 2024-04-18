@@ -24,7 +24,7 @@ import ru.kuzmin.gptbot.service.GptService;
 
 import static ru.kuzmin.gptbot.Enum.GPTModel.*;
 import static ru.kuzmin.gptbot.Enum.ChatRole.*;
-import static ru.kuzmin.gptbot.utils.Command.*;
+import static ru.kuzmin.gptbot.utils.Commands.*;
 
 /**
  * @author Kuzmin Artem

@@ -23,16 +23,15 @@ import static ru.kuzmin.gptbot.interaction.Request.newRequest;
 
 @Service
 @RequiredArgsConstructor
-public class GptService {
+public class GptClient {
 
     private final RestTemplate restTemplate;
 
-    private String apiToken;
 
     @Value("${app.completions.uri}")
     private String completionsUri;
 
-    public String getResponse(List<Message> messages, GPTModel model, Double temperature) {
+    public String getResponse(List<Message> messages, GPTModel model, Double temperature, String apiToken) {
 
         HttpEntity<Request> requestHttpEntity = new HttpEntity<>(
                 newRequest(model, messages, temperature),
@@ -55,7 +54,6 @@ public class GptService {
 
     @PostConstruct
     private void init() {
-        apiToken = System.getProperty("apiToken");
         restTemplate.getForEntity("https://api.telegram.org/bot" + System.getProperty("botToken") + "/getUpdates?offset=-1", String.class);
 
     }

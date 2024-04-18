@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Getter;
-import ru.kuzmin.gptbot.Enum.Role;
+import ru.kuzmin.gptbot.enums.Role;
 import ru.kuzmin.gptbot.interaction.Message;
 
 /**

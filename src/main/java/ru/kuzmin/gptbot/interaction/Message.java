@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.kuzmin.gptbot.Enum.Role;
+import ru.kuzmin.gptbot.enums.Role;
 
 /**
  * @author Kuzmin Artem

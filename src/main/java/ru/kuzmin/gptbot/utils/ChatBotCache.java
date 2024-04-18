@@ -3,8 +3,8 @@ package ru.kuzmin.gptbot.utils;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import ru.kuzmin.gptbot.Enum.Role;
-import ru.kuzmin.gptbot.Enum.GPTModel;
+import ru.kuzmin.gptbot.enums.Role;
+import ru.kuzmin.gptbot.enums.GPTModel;
 import ru.kuzmin.gptbot.interaction.Message;
 
 /**

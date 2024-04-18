@@ -13,17 +13,17 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.kuzmin.gptbot.Enum.Role;
-import ru.kuzmin.gptbot.Enum.GPTModel;
+import ru.kuzmin.gptbot.enums.Role;
+import ru.kuzmin.gptbot.enums.GPTModel;
 import ru.kuzmin.gptbot.bot.KzmGptBot;
 import ru.kuzmin.gptbot.interaction.Message;
 import ru.kuzmin.gptbot.utils.ChatBotCache;
 import ru.kuzmin.gptbot.utils.ChatMessageSender;
 
-import static ru.kuzmin.gptbot.Enum.Role.ASSISTANT;
-import static ru.kuzmin.gptbot.Enum.Role.USER;
-import static ru.kuzmin.gptbot.Enum.GPTModel.GPT_3_5;
-import static ru.kuzmin.gptbot.Enum.GPTModel.GPT_4_TURBO;
+import static ru.kuzmin.gptbot.enums.Role.ASSISTANT;
+import static ru.kuzmin.gptbot.enums.Role.USER;
+import static ru.kuzmin.gptbot.enums.GPTModel.GPT_3_5;
+import static ru.kuzmin.gptbot.enums.GPTModel.GPT_4_TURBO;
 import static ru.kuzmin.gptbot.utils.Commands.*;
 
 /**

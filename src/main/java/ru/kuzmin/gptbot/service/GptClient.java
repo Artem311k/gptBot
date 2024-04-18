@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import ru.kuzmin.gptbot.Enum.GPTModel;
+import ru.kuzmin.gptbot.enums.GPTModel;
 import ru.kuzmin.gptbot.interaction.ChatResponse;
 import ru.kuzmin.gptbot.interaction.Message;
 import ru.kuzmin.gptbot.interaction.Request;

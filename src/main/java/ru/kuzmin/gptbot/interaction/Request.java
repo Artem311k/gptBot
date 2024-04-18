@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.kuzmin.gptbot.Enum.GPTModel;
+import ru.kuzmin.gptbot.enums.GPTModel;
 
 /**
  * @author Kuzmin Artem

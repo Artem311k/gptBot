@@ -1,7 +1,5 @@
-package ru.kuzmin.gptbot.Enum;
+package ru.kuzmin.gptbot.enums;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**

@@ -52,7 +52,7 @@ public class ChatBotCache {
         modelCache.put(chatId, gptModel);
     }
 
-    private void setMaxContentLength(int maxContentLength) {
+    public void setMaxContentLength(int maxContentLength) {
         this.maxContentLength = maxContentLength;
     }
 

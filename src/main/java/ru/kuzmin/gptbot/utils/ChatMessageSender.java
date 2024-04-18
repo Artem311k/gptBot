@@ -1,4 +1,4 @@
-package ru.kuzmin.gptbot.service;
+package ru.kuzmin.gptbot.utils;
 
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;

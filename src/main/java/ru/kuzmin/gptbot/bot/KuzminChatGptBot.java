@@ -19,15 +19,9 @@ import ru.kuzmin.gptbot.service.GptChatProcessor;
 @Slf4j
 public class KuzminChatGptBot extends KzmGptBot {
 
-    public KuzminChatGptBot(GptChatProcessor processor,
-            @Value("${app.default.prompt}") String prompt,
-            @Value("${app.max.context.length}") Integer maxContentLength,
-            @Value("${app.temperature}") Double temperature) {
-        super(System.getProperty("botToken"),
-                prompt,
-                maxContentLength,
-                temperature,
-                System.getProperty("apiToken"));
+    public KuzminChatGptBot(GptChatProcessor processor, @Value("${app.default.prompt}") String prompt,
+            @Value("${app.max.context.length}") Integer maxContentLength, @Value("${app.temperature}") Double temperature) {
+        super(System.getProperty("botToken"), prompt, maxContentLength, temperature, System.getProperty("apiToken"));
         this.processor = processor;
     }
 
@@ -44,7 +38,7 @@ public class KuzminChatGptBot extends KzmGptBot {
         return "kuzmin_chat_bot";
     }
 
-    private void delegate(KuzminChatGptBot bot, Update update) {
+    private void delegate(KzmGptBot bot, Update update) {
         processor.process(bot, update);
     }
 

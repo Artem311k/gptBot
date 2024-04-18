@@ -12,11 +12,13 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.kuzmin.gptbot.Enum.Role;
 import ru.kuzmin.gptbot.Enum.GPTModel;
 import ru.kuzmin.gptbot.bot.KzmGptBot;
 import ru.kuzmin.gptbot.interaction.Message;
 import ru.kuzmin.gptbot.utils.ChatBotCache;
+import ru.kuzmin.gptbot.utils.ChatMessageSender;
 
 import static ru.kuzmin.gptbot.Enum.Role.ASSISTANT;
 import static ru.kuzmin.gptbot.Enum.Role.USER;
@@ -29,6 +31,7 @@ import static ru.kuzmin.gptbot.utils.Commands.*;
  * @since 18 апр. 2024 г.
  */
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Scope("prototype")
@@ -61,6 +64,7 @@ public class GptChatProcessor {
     }
 
     private void processMessage(KzmGptBot bot, String chatId, String text) {
+
         Future<?> typingFuture = pretendTyping(bot, chatId);
 
         addMessageToContext(bot, chatId, USER, text);
@@ -71,12 +75,12 @@ public class GptChatProcessor {
             sendChatResponseToUser(bot, chatId, response);
             addMessageToContext(bot, chatId, ASSISTANT, response);
         } catch (Exception e) {
+            log.error("Error occurred while getting a response.", e);
             sendErrorMessage(bot, chatId, e.getMessage());
         } finally {
             typingFuture.cancel(true);
         }
         switchToDefaultModel(bot, chatId);
-
     }
 
     private Future<?> pretendTyping(TelegramLongPollingBot bot, String chatId) {

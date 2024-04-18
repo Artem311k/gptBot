@@ -27,14 +27,13 @@ public class GptClient {
 
     private final RestTemplate restTemplate;
 
-
     @Value("${app.completions.uri}")
     private String completionsUri;
 
-    public String getResponse(List<Message> messages, GPTModel model, Double temperature, String apiToken) {
+    public String getResponse(List<Message> context, GPTModel model, Double temperature, String apiToken) {
 
         HttpEntity<Request> requestHttpEntity = new HttpEntity<>(
-                newRequest(model, messages, temperature),
+                newRequest(model, context, temperature),
                 buildHeaders(apiToken));
 
         ResponseEntity<ChatResponse> response = restTemplate.exchange(completionsUri, HttpMethod.POST, requestHttpEntity, ChatResponse.class);

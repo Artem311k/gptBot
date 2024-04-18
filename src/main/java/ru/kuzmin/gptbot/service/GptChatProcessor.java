@@ -1,10 +1,7 @@
 package ru.kuzmin.gptbot.service;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -41,6 +38,7 @@ public class GptChatProcessor {
     private final ChatMessageSender messageSender;
     private final ConcurrentHashMap<String, ChatBotCache> cache = new ConcurrentHashMap<>();
     private final ExecutorService typer = Executors.newCachedThreadPool();
+    private final ExecutorService executor = Executors.newCachedThreadPool();
 
     public void process(KzmGptBot bot, Update update) {
 
@@ -69,18 +67,27 @@ public class GptChatProcessor {
 
         addMessageToContext(bot, chatId, USER, text);
 
-        String response;
+        Future<String> responseFuture = executor.submit(() ->
+                gptClient.getResponse(currentContext(bot, chatId), currentModel(bot, chatId), bot.getTemperature(), bot.getApiToken()));
+
         try {
-            response = gptClient.getResponse(currentContext(bot, chatId), currentModel(bot, chatId), bot.getTemperature(), bot.getApiToken());
+            String response = responseFuture.get(1, TimeUnit.MINUTES);
             sendChatResponseToUser(bot, chatId, response);
             addMessageToContext(bot, chatId, ASSISTANT, response);
-        } catch (Exception e) {
-            log.error("Error occurred while getting a response.", e);
-            sendErrorMessage(bot, chatId, e.getMessage());
+        } catch (ExecutionException e) {
+            log.error("Error occurred while getting a response.", e.getCause());
+            sendErrorMessage(bot, chatId, e.getCause().getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("The operation was interrupted.", e);
+        } catch (TimeoutException e) {
+            log.error("The operation timed out.", e);
+            sendErrorMessage(bot, chatId, "The operation timed out.");
+            responseFuture.cancel(true);
         } finally {
             typingFuture.cancel(true);
+            switchToDefaultModel(bot, chatId);
         }
-        switchToDefaultModel(bot, chatId);
     }
 
     private Future<?> pretendTyping(TelegramLongPollingBot bot, String chatId) {

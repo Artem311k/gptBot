@@ -24,7 +24,7 @@ public class ChatBotCache {
 
     private String prompt;
 
-    private final ConcurrentHashMap<String, ChatContext> chatContext = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ChatContext> chatContextCache = new ConcurrentHashMap<>();
 
     private final ConcurrentHashMap<String, GPTModel> modelCache = new ConcurrentHashMap<>();
 
@@ -32,7 +32,7 @@ public class ChatBotCache {
 
     public void initCache(String chatId) {
         modelCache.putIfAbsent(chatId, GPTModel.GPT_3_5);
-        chatContext.putIfAbsent(chatId, new ChatContext(maxContentLength, prompt));
+        chatContextCache.putIfAbsent(chatId, new ChatContext(maxContentLength, prompt));
     }
 
     public boolean isUserEnabled(String userId) {
@@ -52,15 +52,15 @@ public class ChatBotCache {
     }
 
     public List<Message> getChatContext(String chatId) {
-        return chatContext.get(chatId).getMessages();
+        return chatContextCache.get(chatId).getMessages();
     }
 
     public void addMessageToContext(String chatId, Role role, String text) {
-        chatContext.get(chatId).addMessageToContext(role, text);
+        chatContextCache.get(chatId).addMessageToContext(role, text);
     }
 
     public void flushContext(String chatId) {
-        chatContext.get(chatId).flushContext();
+        chatContextCache.get(chatId).flushContext();
     }
 
     public GPTModel getCurrentModel(String chatId) {

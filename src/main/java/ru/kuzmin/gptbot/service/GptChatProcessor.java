@@ -1,21 +1,15 @@
 package ru.kuzmin.gptbot.service;
 
-import java.util.List;
 import java.util.concurrent.*;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.kuzmin.gptbot.enums.Role;
 import ru.kuzmin.gptbot.enums.GPTModel;
 import ru.kuzmin.gptbot.bot.KzmGptBot;
-import ru.kuzmin.gptbot.interaction.Message;
-import ru.kuzmin.gptbot.utils.ChatBotCache;
-import ru.kuzmin.gptbot.utils.ChatMessageSender;
 
 import static ru.kuzmin.gptbot.enums.Role.ASSISTANT;
 import static ru.kuzmin.gptbot.enums.Role.USER;
@@ -35,8 +29,6 @@ import static ru.kuzmin.gptbot.utils.Commands.*;
 public class GptChatProcessor {
 
     private final GptClient gptClient;
-    private final ChatMessageSender messageSender;
-    private final ConcurrentHashMap<String, ChatBotCache> cache = new ConcurrentHashMap<>();
     private final ExecutorService typer = Executors.newCachedThreadPool();
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -50,9 +42,9 @@ public class GptChatProcessor {
         String text = update.getMessage().getText();
         String chatId = update.getMessage().getChatId().toString();
 
-        initCache(bot, chatId);
+        bot.initCache(chatId);
 
-        if (!checkIfUserEnabled(bot, userId)) {
+        if (!bot.checkIfUserEnabled(userId)) {
             register(bot, userId, chatId, text);
             return;
         }
@@ -71,15 +63,15 @@ public class GptChatProcessor {
 
         Future<?> typingFuture = pretendTyping(bot, chatId);
 
-        addMessageToContext(bot, chatId, USER, text);
+        bot.addMessageToContext(chatId, USER, text);
 
         Future<String> responseFuture = executor.submit(() ->
-                gptClient.getResponse(currentContext(bot, chatId), currentModel(bot, chatId), bot.getTemperature(), bot.getApiToken()));
+                gptClient.getResponse(bot.getCurrentContext(chatId), bot.getCurrentModel(chatId), bot.getTemperature(), bot.getApiToken()));
 
         try {
             String response = responseFuture.get(1, TimeUnit.MINUTES);
-            sendChatResponseToUser(bot, chatId, response);
-            addMessageToContext(bot, chatId, ASSISTANT, response);
+            bot.sendMessage(chatId, response);
+            bot.addMessageToContext(chatId, ASSISTANT, response);
         } catch (ExecutionException e) {
             log.error("Error occurred while getting a response.", e.getCause());
             sendErrorMessage(bot, chatId, e.getCause().getMessage());
@@ -96,10 +88,10 @@ public class GptChatProcessor {
         }
     }
 
-    private Future<?> pretendTyping(TelegramLongPollingBot bot, String chatId) {
+    private Future<?> pretendTyping(KzmGptBot bot, String chatId) {
         return typer.submit(() -> {
             while (!Thread.currentThread().isInterrupted()) {
-                messageSender.sendTypingAction(bot, chatId);
+                bot.pretendTyping(chatId);
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -114,71 +106,42 @@ public class GptChatProcessor {
             sendRegisterMessage(bot, chatId);
             return;
         }
-        getBotCache(bot).enableUser(userId);
-        messageSender.sendMessage(bot, chatId, "Теперь можно пользоваться ботом!");
+        bot.enableUser(userId);
+        bot.sendMessage(chatId, "Теперь можно пользоваться ботом!");
         sendHelpMessage(bot, chatId);
     }
 
-    private boolean checkIfUserEnabled(TelegramLongPollingBot bot, String userId) {
-        return getBotCache(bot).isUserEnabled(userId);
-    }
-
-    private void sendChatResponseToUser(TelegramLongPollingBot bot, String chatId, String responses) {
-        messageSender.sendMessage(bot, chatId, responses);
-    }
-
     private void handleFlush(KzmGptBot bot, String chatId) {
-        getBotCache(bot).flushContext(chatId);
-        messageSender.sendMessage(bot, chatId, buildFlushContextMessage());
+        bot.flushContext(chatId);
+        bot.sendMessage(chatId, buildFlushContextMessage());
     }
 
     private void switchToModel(KzmGptBot bot, String chatId, GPTModel model) {
-        messageSender.sendMessage(bot, chatId, "Установлена модель " + model.getValue());
-        getBotCache(bot).switchToModel(chatId, model);
+        bot.sendMessage(chatId, "Установлена модель " + model.getValue());
+        bot.switchModel(chatId, model);
     }
 
     private void switchToDefaultModel(KzmGptBot bot, String chatId) {
-        if (!currentModel(bot, chatId).equals(GPT_3_5)) {
+        if (!bot.getCurrentModel(chatId).equals(GPT_3_5)) {
             switchToModel(bot, chatId, GPT_3_5);
         }
     }
 
-    private void initCache(KzmGptBot bot, String chatId) {
-        cache.putIfAbsent(bot.getBotUsername(), new ChatBotCache(bot.getMaxContentLength(), bot.getDefaultPrompt()));
-        cache.get(bot.getBotUsername()).initCache(chatId);
-    }
-
-    private void addMessageToContext(TelegramLongPollingBot bot, String chatId, Role role, String message) {
-        getBotCache(bot).addMessageToContext(chatId, role, message);
-    }
-
-    private void handleStart(TelegramLongPollingBot bot, String chatId) {
-        messageSender.sendMessage(bot, chatId, buildStartMessage());
+    private void handleStart(KzmGptBot bot, String chatId) {
+        bot.sendMessage(chatId, buildStartMessage());
         sendHelpMessage(bot, chatId);
     }
 
-    private void sendHelpMessage(TelegramLongPollingBot bot, String chatId) {
-        messageSender.sendMessage(bot, chatId, String.format(getHelpMessage(), currentModel(bot, chatId).getValue()));
+    private void sendHelpMessage(KzmGptBot bot, String chatId) {
+        bot.sendMessage(chatId, String.format(getHelpMessage(), bot.getCurrentModel(chatId).getValue()));
     }
 
-    private ChatBotCache getBotCache(TelegramLongPollingBot bot) {
-        return cache.get(bot.getBotUsername());
+    private void sendErrorMessage(KzmGptBot bot, String chatId, String message) {
+        bot.sendMessage(chatId, "Exception while trying to get response : " + message);
     }
 
-    private GPTModel currentModel(TelegramLongPollingBot bot, String chatId) {
-        return getBotCache(bot).getCurrentModel(chatId);
-    }
-
-    private List<Message> currentContext(TelegramLongPollingBot bot, String chatId) {
-        return getBotCache(bot).getChatContext(chatId);
-    }
-
-    private void sendErrorMessage(TelegramLongPollingBot bot, String chatId, String message) {
-        messageSender.sendMessage(bot, chatId, "Exception while trying to get response : " + message);
-    }
-
-    private void sendRegisterMessage(TelegramLongPollingBot bot, String chatId) {
-        messageSender.sendMessage(bot, chatId, buildRegisterMessage());
+    private void sendRegisterMessage(KzmGptBot bot, String chatId) {
+        bot.sendMessage(chatId, buildRegisterMessage());
     }
 
     private String buildRegisterMessage() {

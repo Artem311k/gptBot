@@ -116,6 +116,7 @@ public class GptChatProcessor {
         }
         getBotCache(bot).enableUser(userId);
         messageSender.sendMessage(bot, chatId, "Теперь можно пользоваться ботом!");
+        sendHelpMessage(bot, chatId);
     }
 
     private boolean checkIfUserEnabled(TelegramLongPollingBot bot, String userId) {

@@ -20,8 +20,8 @@ import ru.kuzmin.gptbot.service.GptChatProcessor;
 public class KuzminChatGptBot extends KzmGptBot {
 
     public KuzminChatGptBot(GptChatProcessor processor, @Value("${app.default.prompt}") String prompt,
-            @Value("${app.max.context.length}") Integer maxContentLength, @Value("${app.temperature}") Double temperature) {
-        super(System.getProperty("botToken"), prompt, maxContentLength, temperature, System.getProperty("apiToken"));
+            @Value("${app.max.context.length}") Integer maxContentLength, @Value("${app.temperature}") Double temperature, @Value("${app.bot.password}") String password) {
+        super(System.getProperty("botToken"), prompt, maxContentLength, temperature, System.getProperty("apiToken"), password);
         this.processor = processor;
     }
 

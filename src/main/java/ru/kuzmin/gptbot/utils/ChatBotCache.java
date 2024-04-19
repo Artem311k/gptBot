@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import ru.kuzmin.gptbot.enums.Role;
 import ru.kuzmin.gptbot.enums.GPTModel;
+import ru.kuzmin.gptbot.enums.UserStatus;
 import ru.kuzmin.gptbot.interaction.Message;
 
 /**
@@ -27,9 +28,27 @@ public class ChatBotCache {
 
     private final ConcurrentHashMap<String, GPTModel> modelCache = new ConcurrentHashMap<>();
 
+    private final ConcurrentHashMap<String, UserStatus> usersCache = new ConcurrentHashMap<>();
+
     public void initCache(String chatId) {
         modelCache.putIfAbsent(chatId, GPTModel.GPT_3_5);
         chatContext.putIfAbsent(chatId, new ChatContext(maxContentLength, prompt));
+    }
+
+    public boolean isUserEnabled(String userId) {
+        if (usersCache.get(userId) == null) {
+            usersCache.put(userId, UserStatus.UNKNOWN);
+            return false;
+        }
+        return usersCache.get(userId).equals(UserStatus.REGISTERED);
+    }
+
+    public void enableUser(String userId) {
+        usersCache.put(userId, UserStatus.REGISTERED);
+    }
+
+    public void disableUser(String userId) {
+        usersCache.put(userId, UserStatus.UNKNOWN);
     }
 
     public List<Message> getChatContext(String chatId) {

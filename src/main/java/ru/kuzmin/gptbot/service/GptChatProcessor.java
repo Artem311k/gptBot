@@ -46,10 +46,16 @@ public class GptChatProcessor {
             return;
         }
 
+        String userId = update.getMessage().getFrom().getId().toString();
         String text = update.getMessage().getText();
         String chatId = update.getMessage().getChatId().toString();
 
         initCache(bot, chatId);
+
+        if (!checkIfUserEnabled(bot, userId)) {
+            register(bot, userId, chatId, text);
+            return;
+        }
 
         switch (text) {
         case START -> handleStart(bot, chatId);
@@ -101,6 +107,19 @@ public class GptChatProcessor {
                 }
             }
         });
+    }
+
+    private void register(KzmGptBot bot, String userId, String chatId, String password) {
+        if (!password.equals(bot.getPassword())) {
+            sendRegisterMessage(bot, chatId);
+            return;
+        }
+        getBotCache(bot).enableUser(userId);
+        messageSender.sendMessage(bot, chatId, "Теперь можно пользоваться ботом!");
+    }
+
+    private boolean checkIfUserEnabled(TelegramLongPollingBot bot, String userId) {
+        return getBotCache(bot).isUserEnabled(userId);
     }
 
     private void sendChatResponseToUser(TelegramLongPollingBot bot, String chatId, String responses) {
@@ -155,6 +174,14 @@ public class GptChatProcessor {
 
     private void sendErrorMessage(TelegramLongPollingBot bot, String chatId, String message) {
         messageSender.sendMessage(bot, chatId, "Exception while trying to get response : " + message);
+    }
+
+    private void sendRegisterMessage(TelegramLongPollingBot bot, String chatId) {
+        messageSender.sendMessage(bot, chatId, buildRegisterMessage());
+    }
+
+    private String buildRegisterMessage() {
+        return "Для ипользования бота необходимо ввести пароль";
     }
 
     private String getHelpMessage() {

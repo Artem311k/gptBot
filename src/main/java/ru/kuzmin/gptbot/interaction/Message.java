@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.kuzmin.gptbot.Enum.ChatRole;
+import ru.kuzmin.gptbot.enums.Role;
 
 /**
  * @author Kuzmin Artem
@@ -16,7 +16,7 @@ import ru.kuzmin.gptbot.Enum.ChatRole;
 @NoArgsConstructor
 public class Message {
 
-    private ChatRole chatRole;
+    private Role role;
     private String content;
 
 }

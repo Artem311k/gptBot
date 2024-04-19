@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import ru.kuzmin.gptbot.Enum.GPTModel;
+import ru.kuzmin.gptbot.enums.GPTModel;
 import ru.kuzmin.gptbot.interaction.ChatResponse;
 import ru.kuzmin.gptbot.interaction.Message;
 import ru.kuzmin.gptbot.interaction.Request;
@@ -23,19 +23,17 @@ import static ru.kuzmin.gptbot.interaction.Request.newRequest;
 
 @Service
 @RequiredArgsConstructor
-public class GptService {
+public class GptClient {
 
     private final RestTemplate restTemplate;
-
-    private String apiToken;
 
     @Value("${app.completions.uri}")
     private String completionsUri;
 
-    public String getResponse(List<Message> messages, GPTModel model, Double temperature) {
+    public String getResponse(List<Message> context, GPTModel model, Double temperature, String apiToken) {
 
         HttpEntity<Request> requestHttpEntity = new HttpEntity<>(
-                newRequest(model, messages, temperature),
+                newRequest(model, context, temperature),
                 buildHeaders(apiToken));
 
         ResponseEntity<ChatResponse> response = restTemplate.exchange(completionsUri, HttpMethod.POST, requestHttpEntity, ChatResponse.class);
@@ -55,7 +53,6 @@ public class GptService {
 
     @PostConstruct
     private void init() {
-        apiToken = System.getProperty("apiToken");
         restTemplate.getForEntity("https://api.telegram.org/bot" + System.getProperty("botToken") + "/getUpdates?offset=-1", String.class);
 
     }

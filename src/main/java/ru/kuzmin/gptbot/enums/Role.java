@@ -1,4 +1,4 @@
-package ru.kuzmin.gptbot.Enum;
+package ru.kuzmin.gptbot.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * @author Kuzmin Artem
  * @since 11 апр. 2024 г.
  */
-public enum ChatRole {
+public enum Role {
     SYSTEM("system"),
     USER("user"),
     ASSISTANT("assistant");
@@ -14,7 +14,7 @@ public enum ChatRole {
     private final String role;
 
 
-    ChatRole(String role) {
+    Role(String role) {
         this.role = role;
     }
 

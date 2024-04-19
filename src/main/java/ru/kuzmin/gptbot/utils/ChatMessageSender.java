@@ -23,7 +23,7 @@ public class ChatMessageSender {
         sendChatAction.setChatId(chatId);
         sendChatAction.setAction(ActionType.TYPING);
         try {
-            bot.execute(sendChatAction);
+            bot.executeAsync(sendChatAction);
         } catch (TelegramApiException ex) {
             log.error("Exception while sending message", ex);
 
@@ -36,7 +36,7 @@ public class ChatMessageSender {
 
     public void sendMessage(TelegramLongPollingBot bot, SendMessage sendMessage) {
         try {
-            bot.execute(sendMessage);
+            bot.executeAsync(sendMessage);
         } catch (TelegramApiException e) {
             log.error("Error sending message to {} with {}", sendMessage.getChatId(), bot.getBotUsername());
         }

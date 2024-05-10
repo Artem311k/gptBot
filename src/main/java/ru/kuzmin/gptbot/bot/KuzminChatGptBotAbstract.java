@@ -9,8 +9,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.kuzmin.gptbot.service.GptChatProcessor;
-import ru.kuzmin.gptbot.utils.ChatBotCache;
-import ru.kuzmin.gptbot.utils.ChatMessageSender;
 
 /**
  * @author Kuzmin Artem
@@ -19,12 +17,12 @@ import ru.kuzmin.gptbot.utils.ChatMessageSender;
 
 @Component
 @Slf4j
-public class KuzminChatGptBot extends KzmGptBot {
+public class KuzminChatGptBotAbstract extends AbstractKzmGptBot {
 
     private final GptChatProcessor processor;
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    public KuzminChatGptBot(
+    public KuzminChatGptBotAbstract(
             GptChatProcessor processor,
             @Value("${app.default.prompt}") String prompt,
             @Value("${app.max.context.length}") Integer maxContentLength,
@@ -35,7 +33,6 @@ public class KuzminChatGptBot extends KzmGptBot {
                 prompt,
                 maxContentLength,
                 temperature,
-                System.getProperty("apiToken"),
                 password,
                 new ChatBotCache(maxContentLength, prompt),
                 new ChatMessageSender()

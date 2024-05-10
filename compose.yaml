@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: 'postgres:15'
+    environment:
+      - 'POSTGRES_DB=gpt_db'
+      - 'POSTGRES_PASSWORD=appuser'
+      - 'POSTGRES_USER=appuser'
+#    volumes:
+#      - ./init:/docker-entrypoint-initdb.d
+    ports:
+      - 5423:5432
+#  rabbitmq:
+#    image: 'rabbitmq:latest'
+#    environment:
+#      - 'RABBITMQ_DEFAULT_PASS=secret'
+#      - 'RABBITMQ_DEFAULT_USER=myuser'
+#    ports:
+#      - '5672'

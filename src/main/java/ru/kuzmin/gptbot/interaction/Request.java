@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.kuzmin.gptbot.enums.GPTModel;
+import ru.kuzmin.gptbot.enums.GPTModelName;
 
 /**
  * @author Kuzmin Artem
@@ -18,11 +18,11 @@ import ru.kuzmin.gptbot.enums.GPTModel;
 @NoArgsConstructor
 public class Request {
 
-    private GPTModel model;
+    private GPTModelName model;
     private List<Message> messages;
     private Double temperature;
 
-    public static Request newRequest(GPTModel model, List<Message> messages, Double temperature) {
+    public static Request newRequest(GPTModelName model, List<Message> messages, Double temperature) {
         return new Request(model, messages, temperature);
 
     }

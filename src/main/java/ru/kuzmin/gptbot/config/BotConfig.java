@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
-import ru.kuzmin.gptbot.bot.KzmGptBot;
+import ru.kuzmin.gptbot.bot.AbstractKzmGptBot;
 
 /**
  * @author Kuzmin Artem
@@ -19,9 +19,9 @@ import ru.kuzmin.gptbot.bot.KzmGptBot;
 public class BotConfig {
 
     @Bean
-    public TelegramBotsApi telegramBotsApi(List<KzmGptBot> bots) throws TelegramApiException {
+    public TelegramBotsApi telegramBotsApi(List<AbstractKzmGptBot> bots) throws TelegramApiException {
         var api = new TelegramBotsApi(DefaultBotSession.class);
-        for (KzmGptBot bot : bots) {
+        for (AbstractKzmGptBot bot : bots) {
             api.registerBot(bot);
         }
         return api;

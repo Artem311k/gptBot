@@ -5,18 +5,16 @@ import java.util.List;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
 import lombok.Getter;
-import ru.kuzmin.gptbot.enums.GPTModel;
+import ru.kuzmin.gptbot.enums.GPTModelName;
 import ru.kuzmin.gptbot.enums.Role;
 import ru.kuzmin.gptbot.interaction.Message;
-import ru.kuzmin.gptbot.utils.ChatBotCache;
-import ru.kuzmin.gptbot.utils.ChatMessageSender;
 
 /**
  * @author Kuzmin Artem
  * @since 18 апр. 2024 г.
  */
 @Getter
-public abstract class KzmGptBot extends TelegramLongPollingBot {
+public abstract class AbstractKzmGptBot extends TelegramLongPollingBot {
 
     private final String defaultPrompt;
     private final Integer maxContentLength;
@@ -26,7 +24,7 @@ public abstract class KzmGptBot extends TelegramLongPollingBot {
     private final ChatBotCache cache;
     private final ChatMessageSender sender;
 
-    public KzmGptBot(String botToken,
+    public AbstractKzmGptBot(String botToken,
             String defaultPrompt,
             Integer maxContentLength,
             Double temperature,
@@ -68,15 +66,15 @@ public abstract class KzmGptBot extends TelegramLongPollingBot {
         cache.flushContext(chatId);
     }
 
-    public void switchModel(String chatId, GPTModel gptModel) {
-        cache.switchToModel(chatId, gptModel);
+    public void switchModel(String chatId, GPTModelName gptModelName) {
+        cache.switchToModel(chatId, gptModelName);
     }
 
     public List<Message> getCurrentContext(String chatId) {
         return cache.getChatContext(chatId);
     }
 
-    public GPTModel getCurrentModel(String chatId) {
+    public GPTModelName getCurrentModel(String chatId) {
         return cache.getCurrentModel(chatId);
     }
 

@@ -2,10 +2,7 @@ package ru.kuzmin.gptbot.interaction;
 
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * @author Kuzmin Artem
@@ -14,14 +11,18 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@ToString
 public class ChatResponse {
 
     private List<Choice> choices;
+    private Usage usage;
+    private String model;
 
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
+    @ToString
     public static class Choice {
 
         private int index;

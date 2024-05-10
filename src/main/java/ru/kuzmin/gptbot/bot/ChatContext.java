@@ -1,4 +1,4 @@
-package ru.kuzmin.gptbot.utils;
+package ru.kuzmin.gptbot.bot;
 
 import java.util.ArrayList;
 import java.util.List;

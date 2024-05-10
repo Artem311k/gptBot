@@ -9,10 +9,12 @@ import org.springframework.web.client.RestTemplate;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import ru.kuzmin.gptbot.enums.GPTModel;
+import ru.kuzmin.gptbot.enums.GPTModelName;
+import ru.kuzmin.gptbot.exceptions.KzmGptException;
 import ru.kuzmin.gptbot.interaction.ChatResponse;
 import ru.kuzmin.gptbot.interaction.Message;
 import ru.kuzmin.gptbot.interaction.Request;
+import ru.kuzmin.gptbot.utils.Balance;
 
 import static ru.kuzmin.gptbot.interaction.Request.newRequest;
 
@@ -30,7 +32,10 @@ public class GptClient {
     @Value("${app.completions.uri}")
     private String completionsUri;
 
-    public String getResponse(List<Message> context, GPTModel model, Double temperature, String apiToken) {
+    @Value("${app.balance.uri}")
+    private String balanceUri;
+
+    public ChatResponse getResponse(List<Message> context, GPTModelName model, Double temperature, String apiToken) {
 
         HttpEntity<Request> requestHttpEntity = new HttpEntity<>(
                 newRequest(model, context, temperature),
@@ -39,16 +44,22 @@ public class GptClient {
         ResponseEntity<ChatResponse> response = restTemplate.exchange(completionsUri, HttpMethod.POST, requestHttpEntity, ChatResponse.class);
 
         return Optional.ofNullable(response.getBody())
-                .map(r -> r.getChoices().get(0).getMessage().getContent())
-                .orElseThrow(() -> new RuntimeException(String.format("Returned null from request to {%s}", completionsUri)));
+                .orElseThrow(() -> new KzmGptException(String.format("Returned null from request to [%s[", completionsUri)));
     }
-
 
     private HttpHeaders buildHeaders(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token);
         headers.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         return headers;
+    }
+
+    public double getBalance(String apiToken) {
+        HttpEntity<Void> entity = new HttpEntity<>(buildHeaders(apiToken));
+        ResponseEntity<Balance> response = restTemplate.exchange(balanceUri, HttpMethod.GET, entity, Balance.class);
+        return Optional.ofNullable(response.getBody())
+                .map(Balance::getBalance)
+                .orElseThrow(() -> new KzmGptException(String.format("Returned null from balance request [%s]", balanceUri)));
     }
 
     @PostConstruct

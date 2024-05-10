@@ -20,7 +20,6 @@ public abstract class AbstractKzmGptBot extends TelegramLongPollingBot {
     private final Integer maxContentLength;
     private final Double temperature;
     private final String password;
-    private final String apiToken;
     private final ChatBotCache cache;
     private final ChatMessageSender sender;
 
@@ -28,7 +27,6 @@ public abstract class AbstractKzmGptBot extends TelegramLongPollingBot {
             String defaultPrompt,
             Integer maxContentLength,
             Double temperature,
-            String apiToken,
             String password,
             ChatBotCache cache,
             ChatMessageSender sender) {
@@ -36,7 +34,6 @@ public abstract class AbstractKzmGptBot extends TelegramLongPollingBot {
         this.defaultPrompt = defaultPrompt;
         this.maxContentLength = maxContentLength;
         this.temperature = temperature;
-        this.apiToken = apiToken;
         this.password = password;
         this.cache = cache;
         this.sender = sender;
@@ -80,10 +77,6 @@ public abstract class AbstractKzmGptBot extends TelegramLongPollingBot {
 
     public void initCache(String chatId) {
         cache.initCache(chatId);
-    }
-
-    public String getApiToken() {
-        return apiToken;
     }
 
     public String getDefaultPrompt() {

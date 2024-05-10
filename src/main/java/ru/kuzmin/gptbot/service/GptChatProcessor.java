@@ -62,6 +62,7 @@ public class GptChatProcessor {
         case GPT_3_5_MSG -> switchToModel(bot, chatId, GPT_3_5);
         case GPT_4_TURBO_MSG -> switchToModel(bot, chatId, GPT_4_TURBO);
         case FLUSH -> handleFlush(bot, chatId);
+        case BALANCE -> handleBalance(bot, chatId);
         case HELP -> sendHelpMessage(bot, chatId);
         default -> processMessage(bot, chatId, text);
         }
@@ -74,7 +75,7 @@ public class GptChatProcessor {
         bot.addMessageToContext(chatId, USER, text);
 
         Future<ChatResponse> responseFuture = executor.submit(() ->
-             gptClient.getResponse(bot.getCurrentContext(chatId), bot.getCurrentModel(chatId), bot.getTemperature(), bot.getApiToken()));
+             gptClient.getResponse(bot.getCurrentContext(chatId), bot.getCurrentModel(chatId), bot.getTemperature()));
 
         try {
             ChatResponse response = responseFuture.get(TIME_OUT, TimeUnit.MINUTES);
@@ -91,23 +92,13 @@ public class GptChatProcessor {
             log.error("The operation timed out.", e);
             sendErrorMessage(bot, chatId, "The operation timed out.");
             responseFuture.cancel(true);
-        } catch (KzmGptException e) {
-            log.error("Exception while processing response");
+        } catch (Exception e) {
+            log.error("Exception while processing response", e);
             sendErrorMessage(bot, chatId, "Exception while processing response");
         } finally {
             typingFuture.cancel(true);
             switchToDefaultModel(bot, chatId);
         }
-    }
-
-    private String addPriceToResponseMessage(String message, Double price) {
-        String priceMessage = String.format("""
-                
-                ***********
-                Приблизительная стоимость запроса %.3f руб.
-                ***********
-                """, price);
-        return message.concat(priceMessage);
     }
 
     private Future<?> pretendTyping(AbstractKzmGptBot bot, String chatId) {
@@ -155,8 +146,7 @@ public class GptChatProcessor {
     }
 
     private void sendHelpMessage(AbstractKzmGptBot bot, String chatId) {
-        String balance = Double.toString(gptClient.getBalance(bot.getApiToken()));
-        bot.sendMessage(chatId, String.format(getHelpMessage(), bot.getCurrentModel(chatId).getValue(), balance));
+        bot.sendMessage(chatId, String.format(getHelpMessage(), bot.getCurrentModel(chatId).getValue()));
     }
 
     private void sendErrorMessage(AbstractKzmGptBot bot, String chatId, String message) {
@@ -167,6 +157,24 @@ public class GptChatProcessor {
         bot.sendMessage(chatId, buildRegisterMessage());
     }
 
+    private void handleBalance(AbstractKzmGptBot bot, String chatId) {
+        bot.sendMessage(chatId, buildBalanceMessage(gptClient.getBalance()));
+    }
+
+    private String buildBalanceMessage(double balance) {
+        return String.format("Текущий баланс: %.3f руб.", balance);
+    }
+
+    private String addPriceToResponseMessage(String message, Double price) {
+        String priceMessage = String.format("""
+                
+                ***********
+                Приблизительная стоимость запроса %.3f руб.
+                ***********
+                """, price);
+        return message.concat(priceMessage);
+    }
+
     private String buildRegisterMessage() {
         return "Для использования бота необходимо ввести пароль";
     }
@@ -174,7 +182,6 @@ public class GptChatProcessor {
     private String getHelpMessage() {
         return """
                 Текущая модель %s.
-                Баланс: %s руб.
                 Выбор модели:
                 /gpt3 - Для активации GPT 3.5 turbo
                 /gpt4 - Для активации GPT 4 turbo

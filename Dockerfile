@@ -11,13 +11,13 @@ LABEL maintainer="kuzmin chat bot"
 EXPOSE 8081
 
 ENV botToken="";
-ENV apiToken="";
+ENV apiTokens="";
 
 # The application's jar file
-ARG JAR_FILE=target/gptBot-0.11.jar
+ARG JAR_FILE=target/gptBot-0.15.jar
 
 # Add the application's jar to the container
 ADD ${JAR_FILE} app.jar
 
 # Run the jar file
-ENTRYPOINT java -DbotToken=$botToken -DapiToken=$apiToken -jar /app.jar
+ENTRYPOINT java -DbotToken=$botToken -DapiTokens=$apiTokens -jar /app.jar

@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.kuzmin.gptbot.enums.GPTModelName;
 import ru.kuzmin.gptbot.exceptions.KzmGptException;
 import ru.kuzmin.gptbot.interaction.ChatResponse;
@@ -23,11 +24,14 @@ import static ru.kuzmin.gptbot.interaction.Request.newRequest;
  * @since 10 апр. 2024 г.
  */
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GptClient {
 
     private final RestTemplate restTemplate;
+
+    private final TokenStorage tokenStorage;
 
     @Value("${app.completions.uri}")
     private String completionsUri;
@@ -35,11 +39,11 @@ public class GptClient {
     @Value("${app.balance.uri}")
     private String balanceUri;
 
-    public ChatResponse getResponse(List<Message> context, GPTModelName model, Double temperature, String apiToken) {
+    public ChatResponse getResponse(List<Message> context, GPTModelName model, Double temperature) {
 
         HttpEntity<Request> requestHttpEntity = new HttpEntity<>(
                 newRequest(model, context, temperature),
-                buildHeaders(apiToken));
+                buildHeaders(tokenStorage.getToken()));
 
         ResponseEntity<ChatResponse> response = restTemplate.exchange(completionsUri, HttpMethod.POST, requestHttpEntity, ChatResponse.class);
 
@@ -54,8 +58,8 @@ public class GptClient {
         return headers;
     }
 
-    public double getBalance(String apiToken) {
-        HttpEntity<Void> entity = new HttpEntity<>(buildHeaders(apiToken));
+    public double getBalance() {
+        HttpEntity<Void> entity = new HttpEntity<>(buildHeaders(tokenStorage.getToken()));
         ResponseEntity<Balance> response = restTemplate.exchange(balanceUri, HttpMethod.GET, entity, Balance.class);
         return Optional.ofNullable(response.getBody())
                 .map(Balance::getBalance)

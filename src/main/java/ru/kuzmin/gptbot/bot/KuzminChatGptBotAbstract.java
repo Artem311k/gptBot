@@ -33,7 +33,6 @@ public class KuzminChatGptBotAbstract extends AbstractKzmGptBot {
                 prompt,
                 maxContentLength,
                 temperature,
-                System.getProperty("apiToken"),
                 password,
                 new ChatBotCache(maxContentLength, prompt),
                 new ChatMessageSender()

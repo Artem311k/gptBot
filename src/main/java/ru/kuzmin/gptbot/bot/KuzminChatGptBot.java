@@ -17,12 +17,12 @@ import ru.kuzmin.gptbot.service.GptChatProcessor;
 
 @Component
 @Slf4j
-public class KuzminChatGptBotAbstract extends AbstractKzmGptBot {
+public class KuzminChatGptBot extends AbstractKzmGptBot {
 
     private final GptChatProcessor processor;
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    public KuzminChatGptBotAbstract(
+    public KuzminChatGptBot(
             GptChatProcessor processor,
             @Value("${app.default.prompt}") String prompt,
             @Value("${app.max.context.length}") Integer maxContentLength,

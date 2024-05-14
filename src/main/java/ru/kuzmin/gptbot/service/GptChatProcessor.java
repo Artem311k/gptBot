@@ -16,8 +16,7 @@ import ru.kuzmin.gptbot.interaction.ChatResponse;
 
 import static ru.kuzmin.gptbot.enums.Role.ASSISTANT;
 import static ru.kuzmin.gptbot.enums.Role.USER;
-import static ru.kuzmin.gptbot.enums.GPTModelName.GPT_3_5;
-import static ru.kuzmin.gptbot.enums.GPTModelName.GPT_4_TURBO;
+import static ru.kuzmin.gptbot.enums.GPTModelName.*;
 import static ru.kuzmin.gptbot.utils.Commands.*;
 
 /**
@@ -60,7 +59,7 @@ public class GptChatProcessor {
         switch (text) {
         case START -> handleStart(bot, chatId);
         case GPT_3_5_MSG -> switchToModel(bot, chatId, GPT_3_5);
-        case GPT_4_TURBO_MSG -> switchToModel(bot, chatId, GPT_4_TURBO);
+        case GPT_4o_TURBO_MSG -> switchToModel(bot, chatId, GPT_4o);
         case FLUSH -> handleFlush(bot, chatId);
         case BALANCE -> handleBalance(bot, chatId);
         case HELP -> sendHelpMessage(bot, chatId);
@@ -81,7 +80,7 @@ public class GptChatProcessor {
             ChatResponse response = responseFuture.get(TIME_OUT, TimeUnit.MINUTES);
             String responseMessage = responseParser.getMessage(response);
             bot.addMessageToContext(chatId, ASSISTANT, responseMessage);
-            bot.sendMessage(chatId, addPriceToResponseMessage(responseMessage, responseParser.getPrice(response)));
+            bot.sendMessage(chatId, addPriceToResponseMessage(responseMessage, responseParser.getPrice(response), response.getModel()));
         } catch (ExecutionException e) {
             log.error("Error occurred while getting a response.", e.getCause());
             sendErrorMessage(bot, chatId, e.getCause().getMessage());
@@ -93,11 +92,11 @@ public class GptChatProcessor {
             sendErrorMessage(bot, chatId, "The operation timed out.");
             responseFuture.cancel(true);
         } catch (Exception e) {
-            log.error("Exception while processing response", e);
-            sendErrorMessage(bot, chatId, "Exception while processing response");
+            log.error("Exception while processing response.", e);
+            sendErrorMessage(bot, chatId, e.getMessage());
         } finally {
             typingFuture.cancel(true);
-            switchToDefaultModel(bot, chatId);
+//            switchToDefaultModel(bot, chatId);
         }
     }
 
@@ -165,13 +164,14 @@ public class GptChatProcessor {
         return String.format("Текущий баланс: %.3f руб.", balance);
     }
 
-    private String addPriceToResponseMessage(String message, Double price) {
+    private String addPriceToResponseMessage(String message, Double price, String model) {
         String priceMessage = String.format("""
                 
                 ***********
                 Приблизительная стоимость запроса %.3f руб.
+                Модель %s
                 ***********
-                """, price);
+                """, price, model);
         return message.concat(priceMessage);
     }
 
@@ -184,10 +184,9 @@ public class GptChatProcessor {
                 Текущая модель %s.
                 Выбор модели:
                 /gpt3 - Для активации GPT 3.5 turbo
-                /gpt4 - Для активации GPT 4 turbo
-                /flush - сборс контекста
-                /help - текущая информация
-                По умолчанию активировна gpt 3.5, модель сбрасывается до 3.5 после каждого новго запроса к gpt4.
+                /gpt4o - Для активации GPT 4o
+                /flush - Сборс контекста
+                /help - Текущая информация
                 """;
     }
 

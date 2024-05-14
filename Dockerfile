@@ -14,7 +14,7 @@ ENV botToken="";
 ENV apiTokens="";
 
 # The application's jar file
-ARG JAR_FILE=target/gptBot-0.15.jar
+ARG JAR_FILE=target/gptBot-0.16.jar
 
 # Add the application's jar to the container
 ADD ${JAR_FILE} app.jar

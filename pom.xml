@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>ru.kuzmin</groupId>
 	<artifactId>gptBot</artifactId>
-	<version>0.15</version>
+	<version>0.16</version>
 	<name>gptBot</name>
 	<description>test bot for gpt</description>
 	<properties>

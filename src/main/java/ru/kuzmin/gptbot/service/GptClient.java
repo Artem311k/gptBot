@@ -15,7 +15,7 @@ import ru.kuzmin.gptbot.exceptions.KzmGptException;
 import ru.kuzmin.gptbot.interaction.ChatResponse;
 import ru.kuzmin.gptbot.interaction.Message;
 import ru.kuzmin.gptbot.interaction.Request;
-import ru.kuzmin.gptbot.utils.Balance;
+import ru.kuzmin.gptbot.interaction.Balance;
 
 import static ru.kuzmin.gptbot.interaction.Request.newRequest;
 

@@ -1,4 +1,4 @@
-package ru.kuzmin.gptbot.utils;
+package ru.kuzmin.gptbot.interaction;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

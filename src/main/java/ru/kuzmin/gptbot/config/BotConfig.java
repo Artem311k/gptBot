@@ -27,8 +27,6 @@ public class BotConfig {
         return api;
     }
 
-
-
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();

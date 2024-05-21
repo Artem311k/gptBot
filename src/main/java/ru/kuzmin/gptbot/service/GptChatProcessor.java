@@ -58,7 +58,7 @@ public class GptChatProcessor {
         switch (text) {
         case START -> handleStart(bot, chatId);
         case GPT_3_5_MSG -> switchToModel(bot, chatId, GPT_3_5);
-        case GPT_4o_TURBO_MSG -> switchToModel(bot, chatId, GPT_4_O);
+        case GPT_4_O_TURBO_MSG -> switchToModel(bot, chatId, GPT_4_O);
         case FLUSH -> handleFlush(bot, chatId);
         case BALANCE -> handleBalance(bot, chatId);
         case HELP -> sendHelpMessage(bot, chatId);
@@ -130,12 +130,6 @@ public class GptChatProcessor {
     private void switchToModel(AbstractKzmGptBot bot, String chatId, GPTModelName model) {
         bot.sendMessage(chatId, "Установлена модель " + model.getValue());
         bot.switchModel(chatId, model);
-    }
-
-    private void switchToDefaultModel(AbstractKzmGptBot bot, String chatId) {
-        if (!bot.getCurrentModel(chatId).equals(GPT_3_5)) {
-            switchToModel(bot, chatId, GPT_3_5);
-        }
     }
 
     private void handleStart(AbstractKzmGptBot bot, String chatId) {

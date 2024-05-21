@@ -22,10 +22,10 @@ public class ResponseParser {
     private Double GPT_3_5_TURBO_PROMPT_PRICE;
 
     @Value("${app.gpt4oPromptPrice}")
-    private Double GPT_4o_PROMPT_PRICE;
+    private Double GPT_4_O_PROMPT_PRICE;
 
     @Value("${app.gpt4oComplPrice}")
-    private Double GPT_4o_COMPL_PRICE;
+    private Double GPT_4_O_COMPL_PRICE;
     public String getMessage(ChatResponse response) {
         return response.getChoices().get(0).getMessage().getContent();
     }
@@ -36,7 +36,7 @@ public class ResponseParser {
         if (response.getModel().contains("gpt-3.5")) {
             return completionTokens * GPT_3_5_TURBO_COMPL_PRICE / 1000 + promptTokens * GPT_3_5_TURBO_PROMPT_PRICE / 1000;
         } else if (response.getModel().contains("gpt-4o")) {
-            return completionTokens * GPT_4o_COMPL_PRICE / 1000 + promptTokens * GPT_4o_PROMPT_PRICE / 1000;
+            return completionTokens * GPT_4_O_COMPL_PRICE / 1000 + promptTokens * GPT_4_O_PROMPT_PRICE / 1000;
         }
         return null;
     }

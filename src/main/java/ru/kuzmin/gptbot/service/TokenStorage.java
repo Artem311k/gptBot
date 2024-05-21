@@ -1,6 +1,8 @@
 package ru.kuzmin.gptbot.service;
 
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.stereotype.Component;
 
@@ -16,27 +18,33 @@ import ru.kuzmin.gptbot.utils.GptApiToken;
 public class TokenStorage {
 
     private final LinkedBlockingQueue<GptApiToken> queue = new LinkedBlockingQueue<>();
+    private final Lock lock = new ReentrantLock();
 
     @PostConstruct
     private void init() {
-        String[] tokens = System.getProperty("apiTokens").split(", ");
+        String[] tokens = System.getProperty("apiTokens").split(",");
         for (String token : tokens) {
             if (!token.isEmpty()) {
-                putIntQueue(new GptApiToken(token.trim()));
+                putInQueue(new GptApiToken(token.trim()));
             }
         }
     }
 
     public String getToken() {
-        if (queue.isEmpty()) {
-            throw new KzmGptException("Token queue is empty!");
+        lock.lock();
+        try {
+            if (queue.isEmpty()) {
+                throw new KzmGptException("Token queue is empty!");
+            }
+            GptApiToken token = queue.poll();
+            putInQueue(token);
+            return token.getValue();
+        } finally {
+            lock.unlock();
         }
-        GptApiToken token = queue.poll();
-        putIntQueue(token);
-        return token.getValue();
     }
 
-    private void putIntQueue(GptApiToken token) {
+    private void putInQueue(GptApiToken token) {
         try {
             queue.put(token);
         } catch (InterruptedException e) {

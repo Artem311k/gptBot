@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.kuzmin.gptbot.enums.GPTModelName;
 import ru.kuzmin.gptbot.bot.AbstractKzmGptBot;
-import ru.kuzmin.gptbot.exceptions.KzmGptException;
 import ru.kuzmin.gptbot.interaction.ChatResponse;
 
 import static ru.kuzmin.gptbot.enums.Role.ASSISTANT;
@@ -59,7 +58,7 @@ public class GptChatProcessor {
         switch (text) {
         case START -> handleStart(bot, chatId);
         case GPT_3_5_MSG -> switchToModel(bot, chatId, GPT_3_5);
-        case GPT_4o_TURBO_MSG -> switchToModel(bot, chatId, GPT_4o);
+        case GPT_4o_TURBO_MSG -> switchToModel(bot, chatId, GPT_4_O);
         case FLUSH -> handleFlush(bot, chatId);
         case BALANCE -> handleBalance(bot, chatId);
         case HELP -> sendHelpMessage(bot, chatId);

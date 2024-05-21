@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum GPTModelName {
 
     GPT_3_5("gpt-3.5-turbo"),
-    GPT_4o("gpt-4o");
+    GPT_4_O("gpt-4o");
 
     private final String model;
 

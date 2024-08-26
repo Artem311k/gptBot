@@ -31,7 +31,7 @@ public class ChatBotCache {
     private final ConcurrentHashMap<String, UserStatus> usersCache = new ConcurrentHashMap<>();
 
     public void initCache(String chatId) {
-        modelCache.putIfAbsent(chatId, GPTModelName.GPT_3_5);
+        modelCache.putIfAbsent(chatId, GPTModelName.GPT_4_O);
         chatContextCache.putIfAbsent(chatId, new ChatContext(maxContentLength, prompt));
     }
 

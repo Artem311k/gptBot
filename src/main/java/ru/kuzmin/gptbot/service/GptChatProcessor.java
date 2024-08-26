@@ -2,6 +2,7 @@ package ru.kuzmin.gptbot.service;
 
 import java.util.concurrent.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -57,8 +58,6 @@ public class GptChatProcessor {
 
         switch (text) {
         case START -> handleStart(bot, chatId);
-        case GPT_3_5_MSG -> switchToModel(bot, chatId, GPT_3_5);
-        case GPT_4_O_TURBO_MSG -> switchToModel(bot, chatId, GPT_4_O);
         case FLUSH -> handleFlush(bot, chatId);
         case BALANCE -> handleBalance(bot, chatId);
         case HELP -> sendHelpMessage(bot, chatId);
@@ -116,12 +115,11 @@ public class GptChatProcessor {
     }
 
     private void register(AbstractKzmGptBot bot, String userId, String chatId, String password) {
-        if (!password.equals(bot.getPassword())) {
+        if (StringUtils.isNotBlank(bot.getPassword()) && !password.equals(bot.getPassword())) {
             sendRegisterMessage(bot, chatId);
             return;
         }
         bot.enableUser(userId);
-        bot.sendMessage(chatId, "Теперь можно пользоваться ботом!");
         sendHelpMessage(bot, chatId);
     }
 
@@ -150,14 +148,14 @@ public class GptChatProcessor {
 
     private void handleStart(AbstractKzmGptBot bot, String chatId) {
         bot.sendMessage(chatId, buildStartMessage());
-        sendHelpMessage(bot, chatId);
     }
 
     private void sendHelpMessage(AbstractKzmGptBot bot, String chatId) {
         bot.sendMessage(chatId, String.format(
                 getHelpMessage(),
                 bot.getCurrentModel(chatId).getValue(),
-                bot.isUseDefaultPrompt() ? bot.getDefaultPrompt() : "Промпт по умолчанию не задан или выключен"));
+                bot.isUseDefaultPrompt() ? bot.getDefaultPrompt() : "Промпт по умолчанию не задан или выключен",
+                gptClient.getBalance()));
     }
 
     private void sendErrorMessage(AbstractKzmGptBot bot, String chatId, String message) {
@@ -173,14 +171,14 @@ public class GptChatProcessor {
     }
 
     private String buildBalanceMessage(double balance) {
-        return String.format("Текущий баланс: %.3f руб.", balance);
+        return String.format("Текущий баланс: %.2f руб.", balance);
     }
 
     private String addPriceToResponseMessage(String message, Double price, String model) {
         String priceMessage = String.format("""
                 
                 ***********
-                Приблизительная стоимость запроса %.3f руб.
+                Приблизительная стоимость запроса %.2f руб.
                 Модель %s
                 ***********
                 """, price, model);
@@ -195,11 +193,8 @@ public class GptChatProcessor {
         return """
                 Текущая модель %s.
                 Промпт: %s.
-                Выбор модели:
-                /gpt3 - Для активации GPT 3.5 turbo
-                /gpt4o - Для активации GPT 4o
-                /defPrompt - вкл/выкл промпт по умолчанию (Отвечать коротко на каждый вопрос)
-                /balance - баланс
+                /defprompt - вкл/выкл промпт по умолчанию (Отвечать коротко на каждый вопрос)
+                /balance - баланс (%.2f руб.)
                 /flush - Сборс контекста
                 /help - Текущая информация
                 """;

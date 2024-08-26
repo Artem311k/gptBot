@@ -26,14 +26,13 @@ public class KuzminChatGptBot extends AbstractKzmGptBot {
             GptChatProcessor processor,
             @Value("${app.default.prompt}") String prompt,
             @Value("${app.max.context.length}") Integer maxContentLength,
-            @Value("${app.temperature}") Double temperature,
-            @Value("${app.bot.password}") String password) {
+            @Value("${app.temperature}") Double temperature) {
         super(
                 System.getProperty("botToken"),
                 prompt,
                 maxContentLength,
                 temperature,
-                password,
+                System.getProperty("botPassword", ""),
                 new ChatBotCache(maxContentLength, prompt),
                 new ChatMessageSender()
         );

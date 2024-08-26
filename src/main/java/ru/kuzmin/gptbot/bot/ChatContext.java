@@ -31,11 +31,21 @@ public class ChatContext {
         }
     }
 
-    public void addMessageToContext(Role role, String text){
+    public void addMessageToContext(Role role, String text) {
         if (messages.size() >= maxContentLength) {
-            messages.remove(1);
+            removeOldestMessage();
         }
         messages.add(new Message(role, text));
+    }
+
+    private void removeOldestMessage() {
+        if (messages.isEmpty()) {
+            return;
+        }
+        int indexToRemove = messages.get(0).getRole().equals(Role.SYSTEM) ? 1 : 0;
+        if (indexToRemove < messages.size()) {
+            messages.remove(indexToRemove);
+        }
     }
 
     public void flushContext() {

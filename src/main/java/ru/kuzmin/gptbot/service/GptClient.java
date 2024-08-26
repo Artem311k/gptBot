@@ -11,6 +11,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.kuzmin.gptbot.enums.GPTModelName;
+import ru.kuzmin.gptbot.exceptions.ErrorStatuses;
 import ru.kuzmin.gptbot.exceptions.KzmGptException;
 import ru.kuzmin.gptbot.interaction.ChatResponse;
 import ru.kuzmin.gptbot.interaction.Message;
@@ -46,9 +47,18 @@ public class GptClient {
                 buildHeaders(tokenStorage.getToken()));
 
         ResponseEntity<ChatResponse> response = restTemplate.exchange(completionsUri, HttpMethod.POST, requestHttpEntity, ChatResponse.class);
+        if (response.getStatusCode() != HttpStatus.OK) {
+            Optional<String> msg = Arrays.stream(ErrorStatuses.values())
+                    .filter(err -> err.getCode() == response.getStatusCode().value())
+                    .findFirst()
+                    .map(ErrorStatuses::getMsg);
+            if (msg.isPresent()) {
+                throw new KzmGptException(String.format("Status code is not 200. [%s] - [%s]", response.getStatusCode(), msg.get()));
+            }
+        }
 
         return Optional.ofNullable(response.getBody())
-                .orElseThrow(() -> new KzmGptException(String.format("Returned null from request to [%s[", completionsUri)));
+                .orElseThrow(() -> new KzmGptException(String.format("Returned null from request to [%s]", completionsUri)));
     }
 
     private HttpHeaders buildHeaders(String token) {

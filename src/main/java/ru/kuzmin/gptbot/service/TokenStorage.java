@@ -31,6 +31,9 @@ public class TokenStorage {
     }
 
     public String getToken() {
+        if (queue.size() == 1) {
+            return queue.peek().getValue();
+        }
         lock.lock();
         try {
             if (queue.isEmpty()) {

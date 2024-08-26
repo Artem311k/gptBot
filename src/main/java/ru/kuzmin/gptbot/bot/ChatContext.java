@@ -3,6 +3,8 @@ package ru.kuzmin.gptbot.bot;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.Getter;
 import ru.kuzmin.gptbot.enums.Role;
 import ru.kuzmin.gptbot.interaction.Message;
@@ -24,7 +26,9 @@ public class ChatContext {
     public ChatContext(int maxContentLength, String prompt) {
         this.maxContentLength = maxContentLength;
         this.prompt = prompt;
-        messages.add(new Message(Role.SYSTEM, prompt));
+        if (StringUtils.isNotBlank(prompt)) {
+            messages.add(new Message(Role.SYSTEM, prompt));
+        }
     }
 
     public void addMessageToContext(Role role, String text){

@@ -11,7 +11,7 @@ public class GptBotApplication {
 
     public static void main(String[] args) {
         log.info("bot token is {}", System.getProperty("botToken"));
-        log.info("api token is {}", System.getProperty("apiToken"));
+        log.info("api tokens are {}", System.getProperty("apiTokens"));
 
        SpringApplication.run(GptBotApplication.class, args);
 

@@ -2,6 +2,7 @@ package ru.kuzmin.gptbot.bot;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
 import lombok.Getter;
@@ -22,6 +23,7 @@ public abstract class AbstractKzmGptBot extends TelegramLongPollingBot {
     private final String password;
     private final ChatBotCache cache;
     private final ChatMessageSender sender;
+    private boolean useDefaultPrompt;
 
     public AbstractKzmGptBot(String botToken,
             String defaultPrompt,
@@ -31,6 +33,7 @@ public abstract class AbstractKzmGptBot extends TelegramLongPollingBot {
             ChatBotCache cache,
             ChatMessageSender sender) {
         super(botToken);
+        this.useDefaultPrompt = StringUtils.isNotBlank(defaultPrompt);
         this.defaultPrompt = defaultPrompt;
         this.maxContentLength = maxContentLength;
         this.temperature = temperature;
@@ -77,6 +80,27 @@ public abstract class AbstractKzmGptBot extends TelegramLongPollingBot {
 
     public void initCache(String chatId) {
         cache.initCache(chatId);
+    }
+
+    public boolean switchDefaultPrompt(String chatId) {
+        return useDefaultPrompt ? removeDefaultPrompt(chatId) : addDefaultPrompt(chatId);
+    }
+
+    private boolean removeDefaultPrompt(String chatId) {
+        cache.getChatContext(chatId)
+                .removeIf(message -> message.getRole().equals(Role.SYSTEM));
+        this.useDefaultPrompt = false;
+        return false;
+    }
+
+    public boolean addDefaultPrompt(String chatId) {
+        if (StringUtils.isNotBlank(defaultPrompt)) {
+            cache.getChatContext(chatId)
+                    .add(0, new Message(Role.SYSTEM, defaultPrompt));
+            this.useDefaultPrompt = true;
+            return true;
+        }
+        return false;
     }
 
     public String getDefaultPrompt() {

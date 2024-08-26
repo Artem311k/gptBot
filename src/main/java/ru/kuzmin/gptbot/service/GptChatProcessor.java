@@ -62,6 +62,7 @@ public class GptChatProcessor {
         case FLUSH -> handleFlush(bot, chatId);
         case BALANCE -> handleBalance(bot, chatId);
         case HELP -> sendHelpMessage(bot, chatId);
+        case DEFAULT_PROMPT -> handeSwitchPrompt(bot, chatId);
         default -> processMessage(bot, chatId, text);
         }
     }
@@ -73,7 +74,9 @@ public class GptChatProcessor {
         bot.addMessageToContext(chatId, USER, text);
 
         Future<ChatResponse> responseFuture = executor.submit(() ->
-             gptClient.getResponse(bot.getCurrentContext(chatId), bot.getCurrentModel(chatId), bot.getTemperature()));
+             gptClient.getResponse(bot.getCurrentContext(chatId),
+                     bot.getCurrentModel(chatId),
+                     bot.getTemperature()));
 
         try {
             ChatResponse response = responseFuture.get(TIME_OUT, TimeUnit.MINUTES);
@@ -122,6 +125,19 @@ public class GptChatProcessor {
         sendHelpMessage(bot, chatId);
     }
 
+    private void handeSwitchPrompt(AbstractKzmGptBot bot, String chatId) {
+        boolean changed = switchDefaultPrompt(bot,chatId);
+        if (changed) {
+            bot.sendMessage(chatId, "Установлен промпт по умолчанию \"" + bot.getDefaultPrompt() +  "\".");
+            return;
+        }
+        bot.sendMessage(chatId, "Промпт по умолчанию выключен");
+    }
+
+    private boolean switchDefaultPrompt(AbstractKzmGptBot bot, String chatId) {
+        return bot.switchDefaultPrompt(chatId);
+    }
+
     private void handleFlush(AbstractKzmGptBot bot, String chatId) {
         bot.flushContext(chatId);
         bot.sendMessage(chatId, buildFlushContextMessage());
@@ -138,7 +154,10 @@ public class GptChatProcessor {
     }
 
     private void sendHelpMessage(AbstractKzmGptBot bot, String chatId) {
-        bot.sendMessage(chatId, String.format(getHelpMessage(), bot.getCurrentModel(chatId).getValue()));
+        bot.sendMessage(chatId, String.format(
+                getHelpMessage(),
+                bot.getCurrentModel(chatId).getValue(),
+                bot.isUseDefaultPrompt() ? bot.getDefaultPrompt() : "Промпт по умолчанию не задан или выключен"));
     }
 
     private void sendErrorMessage(AbstractKzmGptBot bot, String chatId, String message) {
@@ -175,9 +194,12 @@ public class GptChatProcessor {
     private String getHelpMessage() {
         return """
                 Текущая модель %s.
+                Промпт: %s.
                 Выбор модели:
                 /gpt3 - Для активации GPT 3.5 turbo
                 /gpt4o - Для активации GPT 4o
+                /defPrompt - вкл/выкл промпт по умолчанию (Отвечать коротко на каждый вопрос)
+                /balance - баланс
                 /flush - Сборс контекста
                 /help - Текущая информация
                 """;

@@ -52,10 +52,10 @@ public class GptClient {
                     .filter(err -> err.getCode() == response.getStatusCode().value())
                     .findFirst()
                     .map(ErrorStatuses::getMsg);
-            String message = msg.isPresent()
-                    ? String.format("Status code is not 200. [%s] - [%s]", response.getStatusCode(), msg.get())
-                    : "Unknown error occurred during response";
-            throw new KzmGptException(message);
+            String errorMessage = msg.isPresent()
+                    ? String.format("Status code is not 200. [%s] - [%s], [%s]", response.getStatusCode(), msg.get(), response)
+                    : String.format("Unknown error occurred during response [%s]", response);
+            throw new KzmGptException(errorMessage);
         }
 
         return Optional.ofNullable(response.getBody())

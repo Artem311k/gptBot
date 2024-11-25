@@ -52,9 +52,10 @@ public class GptClient {
                     .filter(err -> err.getCode() == response.getStatusCode().value())
                     .findFirst()
                     .map(ErrorStatuses::getMsg);
-            if (msg.isPresent()) {
-                throw new KzmGptException(String.format("Status code is not 200. [%s] - [%s]", response.getStatusCode(), msg.get()));
-            }
+            String message = msg.isPresent()
+                    ? String.format("Status code is not 200. [%s] - [%s]", response.getStatusCode(), msg.get())
+                    : "Unknown error occurred during response";
+            throw new KzmGptException(message);
         }
 
         return Optional.ofNullable(response.getBody())
@@ -81,9 +82,5 @@ public class GptClient {
         restTemplate.getForEntity("https://api.telegram.org/bot" + System.getProperty("botToken") + "/getUpdates?offset=-1", String.class);
 
     }
-
-
-
-
 
 }

@@ -1,8 +1,5 @@
 package ru.kuzmin.gptbot.bot;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -20,7 +17,6 @@ import ru.kuzmin.gptbot.service.GptChatProcessor;
 public class KuzminChatGptBot extends AbstractKzmGptBot {
 
     private final GptChatProcessor processor;
-    private final ExecutorService executor = Executors.newCachedThreadPool();
 
     public KuzminChatGptBot(
             GptChatProcessor processor,
@@ -41,7 +37,7 @@ public class KuzminChatGptBot extends AbstractKzmGptBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        executor.submit(() -> processor.process(this, update));
+        processor.process(this, update);
     }
 
     @Override

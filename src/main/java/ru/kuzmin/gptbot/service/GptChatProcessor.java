@@ -1,22 +1,20 @@
 package ru.kuzmin.gptbot.service;
 
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.kuzmin.gptbot.enums.GPTModelName;
 import ru.kuzmin.gptbot.bot.AbstractKzmGptBot;
 import ru.kuzmin.gptbot.interaction.ChatResponse;
 
 import static ru.kuzmin.gptbot.enums.Role.ASSISTANT;
 import static ru.kuzmin.gptbot.enums.Role.USER;
-import static ru.kuzmin.gptbot.enums.GPTModelName.*;
 import static ru.kuzmin.gptbot.utils.Commands.*;
 
 /**
@@ -27,7 +25,6 @@ import static ru.kuzmin.gptbot.utils.Commands.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Scope("prototype")
 public class GptChatProcessor {
 
     @Value("${app.responseTimeOutMinutes}")
@@ -36,8 +33,14 @@ public class GptChatProcessor {
     private final GptClient gptClient;
 
     private final ResponseParser responseParser;
-    private final ExecutorService typer = Executors.newCachedThreadPool();
-    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final ExecutorService executor = Executors.newFixedThreadPool(50, new ThreadFactory() {
+        private final AtomicInteger threadNumber = new AtomicInteger(1);
+
+        @Override
+        public Thread newThread(Runnable runnable) {
+            return new Thread(runnable, "executor-thread-" + threadNumber.incrementAndGet());
+        }
+    });
 
     public void process(AbstractKzmGptBot bot, Update update) {
 
@@ -102,7 +105,7 @@ public class GptChatProcessor {
     }
 
     private Future<?> pretendTyping(AbstractKzmGptBot bot, String chatId) {
-        return typer.submit(() -> {
+        return executor.submit(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 bot.pretendTyping(chatId);
                 try {
@@ -139,11 +142,6 @@ public class GptChatProcessor {
     private void handleFlush(AbstractKzmGptBot bot, String chatId) {
         bot.flushContext(chatId);
         bot.sendMessage(chatId, buildFlushContextMessage());
-    }
-
-    private void switchToModel(AbstractKzmGptBot bot, String chatId, GPTModelName model) {
-        bot.sendMessage(chatId, "Установлена модель " + model.getValue());
-        bot.switchModel(chatId, model);
     }
 
     private void handleStart(AbstractKzmGptBot bot, String chatId) {
